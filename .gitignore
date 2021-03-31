@@ -2,3 +2,4 @@
 venv/*
 .vscode/
 Machining-feature-dataset-master/dataset/
+FeatureNet-master/recognizer/__pycache__/
