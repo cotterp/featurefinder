@@ -1,0 +1,4 @@
+.DS_Store
+venv/*
+.vscode/
+Machining-feature-dataset-master/dataset/
