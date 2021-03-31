@@ -1,6 +1,10 @@
 # featurefinder
 Workspace for 2.169/6.482 final project
 
+FOR DATABASE: unpack dataset.rar and place in the directory "Machine-feature-dataset-master/dataset/"
+
+Need to install tensorflow to run FeatureNet: https://www.tensorflow.org/install/pip
+
 TODO:
 - implement FeatureNet
   - figure out what is missing from the existing FeatureNet repo (cloned here in "FeatureNet-master" folder)
