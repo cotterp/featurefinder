@@ -1,6 +1,8 @@
 # featurefinder
 Workspace for 2.169/6.482 final project
 
+FOR DATABASE: unpack dataset.rar and place in the directory "Machine-feature-dataset-master/dataset/"
+
 TODO:
 - implement FeatureNet
   - figure out what is missing from the existing FeatureNet repo (cloned here in "FeatureNet-master" folder)
