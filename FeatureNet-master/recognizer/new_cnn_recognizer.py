@@ -127,7 +127,10 @@ def train():
     # learning_rate = tf.train.exponential_decay(starter_learning_rate, my_global_step,
     #                                            4000, 0.2, staircase=True)# changing LR
 
-    data_dir = 'Machining-feature-dataset-master\\dataset\\0_Oring\\'
+    # data_dir = 'D:\\1_big_data_selected\\binvox\\all\\rot\\whole\\train\\dataset\\'
+    # log_dir = 'D:\\1_big_data_selected\\binvox\\all\\rot\\10_class\\train\\dataset\\log1\\'
+
+    data_dir = 'Machining-feature-dataset-master\\dataset\\'
     log_dir = 'log1\\'
 
     images, labels = new_input_processor.read_cifar10(data_dir=data_dir,

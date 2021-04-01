@@ -1,5 +1,6 @@
 .DS_Store
 venv/*
 .vscode/
-Machining-feature-dataset-master/dataset/
+Machining-feature-dataset-master/dataset-original/
+Machining-feature-dataset-master/dataset-working/
 FeatureNet-master/recognizer/__pycache__/
