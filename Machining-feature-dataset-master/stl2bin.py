@@ -1,0 +1,1 @@
+# placeholder script for converting stl files into bin files for input into new_input_processor.py
