@@ -13,8 +13,7 @@ import os
 import os.path
 import math
 import numpy as np
-import tensorflow.compat.v1 as tf
-tf.disable_v2_behavior
+import tensorflow as tf
 import new_input_processor
 
 
@@ -121,15 +120,15 @@ def evaluation(logits, labels):
         tf.summary.scalar(scope.name + '/accuracy', accuracy)
     return accuracy
 
-"""
+
 def train():
     my_global_step = tf.Variable(0, name='global_step', trainable=False)
     # starter_learning_rate = 0.001
     # learning_rate = tf.train.exponential_decay(starter_learning_rate, my_global_step,
     #                                            4000, 0.2, staircase=True)# changing LR
 
-    data_dir = 'D:\\1_big_data_selected\\binvox\\all\\rot\\whole\\train\\dataset\\'
-    log_dir = 'D:\\1_big_data_selected\\binvox\\all\\rot\\10_class\\train\\dataset\\log1\\'
+    data_dir = 'Machining-feature-dataset-master\\dataset\\'
+    log_dir = 'log1\\'
 
     images, labels = new_input_processor.read_cifar10(data_dir=data_dir,
                                                 is_train=True,
@@ -185,7 +184,7 @@ def train():
     sess.close()
 
 train()
-"""
+
 
 '''
 ###########################train with validation#################################
@@ -477,74 +476,74 @@ print(label)
 
 # '''
 
-#################################### Confusion Matrix ########################################################
-import scipy.io as scio
-def confusion_matrix():
-    with tf.Graph().as_default():
+# #################################### Confusion Matrix ########################################################
+# import scipy.io as scio
+# def confusion_matrix():
+#     with tf.Graph().as_default():
 
-        log_dir = 'D:\\1_big_data_selected\\binvox\\all\\rot\\whole\\train\\dataset\\log2\\log_train\\'
-        test_dir = 'D:\\1_big_data_selected\\binvox\\all\\rot\\whole\\test\\dataset\\'
-        n_test = 21600
+#         log_dir = 'D:\\1_big_data_selected\\binvox\\all\\rot\\whole\\train\\dataset\\log2\\log_train\\'
+#         test_dir = 'D:\\1_big_data_selected\\binvox\\all\\rot\\whole\\test\\dataset\\'
+#         n_test = 21600
 
-        # reading test data
-        images, labels = new_input_processor.read_cifar10(data_dir=test_dir,
-                                                    is_train=False,
-                                                    batch_size=BATCH_SIZE,
-                                                    shuffle=False)
+#         # reading test data
+#         images, labels = new_input_processor.read_cifar10(data_dir=test_dir,
+#                                                     is_train=False,
+#                                                     batch_size=BATCH_SIZE,
+#                                                     shuffle=False)
 
-        logits = inference(images)
-        labels = tf.argmax(labels, 1) # one_hot decode
-        value,id=tf.nn.top_k(logits)
-        predict=id
-        # top_k_op = tf.nn.in_top_k(logits, labels, 1)
-        saver = tf.train.Saver(tf.global_variables())
+#         logits = inference(images)
+#         labels = tf.argmax(labels, 1) # one_hot decode
+#         value,id=tf.nn.top_k(logits)
+#         predict=id
+#         # top_k_op = tf.nn.in_top_k(logits, labels, 1)
+#         saver = tf.train.Saver(tf.global_variables())
 
-        with tf.Session() as sess:
+#         with tf.Session() as sess:
 
-            print("Reading checkpoints...")
-            ckpt = tf.train.get_checkpoint_state(log_dir)
-            if ckpt and ckpt.model_checkpoint_path:
-                global_step = ckpt.model_checkpoint_path.split('/')[-1].split('-')[-1]
-                saver.restore(sess, ckpt.model_checkpoint_path)
-                print('Loading success, global_step is %s' % global_step)
-            else:
-                print('No checkpoint file found')
-                return
+#             print("Reading checkpoints...")
+#             ckpt = tf.train.get_checkpoint_state(log_dir)
+#             if ckpt and ckpt.model_checkpoint_path:
+#                 global_step = ckpt.model_checkpoint_path.split('/')[-1].split('-')[-1]
+#                 saver.restore(sess, ckpt.model_checkpoint_path)
+#                 print('Loading success, global_step is %s' % global_step)
+#             else:
+#                 print('No checkpoint file found')
+#                 return
 
-            coord = tf.train.Coordinator()
-            threads = tf.train.start_queue_runners(sess=sess, coord=coord)
+#             coord = tf.train.Coordinator()
+#             threads = tf.train.start_queue_runners(sess=sess, coord=coord)
 
-            try:
-                num_iter = int(math.ceil(n_test / BATCH_SIZE))
-                print(num_iter)
-                true_count = 0
-                total_sample_count = num_iter * BATCH_SIZE
-                step = 0
-                predict_label_all=np.zeros((40,1))
-                true_label_all=np.zeros((1,40))
-                while step < num_iter and not coord.should_stop():
-                    predict_label,true_label=sess.run([predict,labels])
-                    predict_label_all=np.hstack((predict_label_all,predict_label))
-                    true_label_all=np.vstack((true_label_all,true_label))
-                    # print(predict_label)
-                    print(true_label)
-                    # predictions = sess.run([top_k_op])
-                    # true_count += np.sum(predictions)
-                    step += 1
-                    # precision = true_count / total_sample_count
-                # print('precision = %.3f' % precision)
-                return np.reshape(np.transpose(predict_label_all[:,1:]),(1,21600)),np.reshape(true_label_all[1:,:],(1,21600))
-            except Exception as e:
-                coord.request_stop(e)
-            finally:
-                coord.request_stop()
-                coord.join(threads)
+#             try:
+#                 num_iter = int(math.ceil(n_test / BATCH_SIZE))
+#                 print(num_iter)
+#                 true_count = 0
+#                 total_sample_count = num_iter * BATCH_SIZE
+#                 step = 0
+#                 predict_label_all=np.zeros((40,1))
+#                 true_label_all=np.zeros((1,40))
+#                 while step < num_iter and not coord.should_stop():
+#                     predict_label,true_label=sess.run([predict,labels])
+#                     predict_label_all=np.hstack((predict_label_all,predict_label))
+#                     true_label_all=np.vstack((true_label_all,true_label))
+#                     # print(predict_label)
+#                     print(true_label)
+#                     # predictions = sess.run([top_k_op])
+#                     # true_count += np.sum(predictions)
+#                     step += 1
+#                     # precision = true_count / total_sample_count
+#                 # print('precision = %.3f' % precision)
+#                 return np.reshape(np.transpose(predict_label_all[:,1:]),(1,21600)),np.reshape(true_label_all[1:,:],(1,21600))
+#             except Exception as e:
+#                 coord.request_stop(e)
+#             finally:
+#                 coord.request_stop()
+#                 coord.join(threads)
 
-                # %%
+#                 # %%
 
-predict_all,true_all=confusion_matrix()
-save_dir = 'D:\\1_big_data_selected\\share\\con_matrix'
-scio.savemat(save_dir, {'predict':predict_all,'true':true_all})
+# predict_all,true_all=confusion_matrix()
+# save_dir = 'D:\\1_big_data_selected\\share\\con_matrix'
+# scio.savemat(save_dir, {'predict':predict_all,'true':true_all})
 
 
 
