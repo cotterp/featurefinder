@@ -14,15 +14,18 @@ import os.path
 import math
 import numpy as np
 import tensorflow as tf
+tf.logging.set_verbosity(tf.logging.ERROR) # suppress all of the warnings
 import new_input_processor
-
 
 import datetime
 starttime = datetime.datetime.now()
 
-BATCH_SIZE = 40
-learning_rate = 0.001
-MAX_STEP = 20000
+# BATCH_SIZE = 40
+# learning_rate = 0.001
+# MAX_STEP = 20000
+BATCH_SIZE = 50
+learning_rate = 0.01
+MAX_STEP = 10000
 
 def inference(models):
  
@@ -133,12 +136,17 @@ def train():
     data_dir = '/Users/Phil/Dropbox (MIT)/MIT/6. Spring 21/2.169 Physical Modeling and Design Using ML/featurefinder/Machining-feature-dataset-master/dataset-working/'
     log_dir = 'log1'
 
+    # import data from data_dir into images and labels
     images, labels = new_input_processor.read_cifar10(data_dir=data_dir,
                                                 is_train=True,
                                                 batch_size=BATCH_SIZE,
                                                 shuffle=True)
+    print('pre-inference')
+    # run files through the net defined in inference()
     logits = inference(images)
 
+    print('pre-losses')
+    # calculate loss via method defined in losses()
     loss = losses(logits, labels)
 
     optimizer = tf.train.AdamOptimizer(learning_rate)
