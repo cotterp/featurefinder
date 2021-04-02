@@ -130,8 +130,8 @@ def train():
     # data_dir = 'D:\\1_big_data_selected\\binvox\\all\\rot\\whole\\train\\dataset\\'
     # log_dir = 'D:\\1_big_data_selected\\binvox\\all\\rot\\10_class\\train\\dataset\\log1\\'
 
-    data_dir = 'Machining-feature-dataset-master\\dataset\\'
-    log_dir = 'log1\\'
+    data_dir = '/Users/Phil/Dropbox (MIT)/MIT/6. Spring 21/2.169 Physical Modeling and Design Using ML/featurefinder/Machining-feature-dataset-master/dataset-working/'
+    log_dir = 'log1'
 
     images, labels = new_input_processor.read_cifar10(data_dir=data_dir,
                                                 is_train=True,

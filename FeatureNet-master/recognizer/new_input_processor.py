@@ -25,11 +25,11 @@ def read_cifar10(data_dir, is_train, batch_size, shuffle):
     with tf.name_scope('input'):
 
         if is_train:
-            filenames = [os.path.join(data_dir, 'train%d.bin' % ii)
+            filenames = [os.path.join(data_dir, 'train%d.binvox' % ii)
                          for ii in np.arange(0, 50)]
         else:
             # filenames = [os.path.join(data_dir, 'test.bin')]
-            filenames = [os.path.join(data_dir, 'test%d.bin' % jj)
+            filenames = [os.path.join(data_dir, 'test%d.binvox' % jj)
                          for jj in np.arange(0, 11)]
 
         filename_queue = tf.train.string_input_producer(filenames)
