@@ -20,5 +20,3 @@ TODO:
 
 - compare resulting of different implementations
 
--Michael:
-  - github tutorials
