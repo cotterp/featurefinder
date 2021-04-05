@@ -5,3 +5,5 @@ Machining-feature-dataset-master/dataset-original/
 Machining-feature-dataset-master/dataset-working/
 FeatureNet-master/recognizer/__pycache__/
 MeshToBinvox-master/__pycache__/
+log1/*
+FeatureNet-master/.DS_Store
