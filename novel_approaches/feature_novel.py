@@ -1,10 +1,11 @@
-#Last Update: 04/20/21
+#Last Update: 04/21/21
 
 import os
 import time
 from sys import getsizeof
 from matplotlib import pyplot as plt
 import numpy as np
+from scipy.ndimage.interpolation import zoom
 from sklearn.model_selection import train_test_split
 from sklearn.neural_network import MLPClassifier
 import csv
@@ -57,11 +58,10 @@ def centroid(points):
     centroid.append((points[2]+points[5]+points[8])/3)
     return centroid
 
-def return_line(centroids, axis, max_faces):
+def return_line(centroids, axis, norm_points):
     #Returns an ordered set of (x,y,z) centroid points "as the finger runs"
     #across the specified axis.
-    #Will eventually normalizes length to a certain number of points.
-    
+       
     if axis.lower() == "x":
         axis = 0
         f1 = 1
@@ -89,30 +89,12 @@ def return_line(centroids, axis, max_faces):
         f1_points.append(point[f1])
         f2_points.append(point[f2])
     
-    while len(axis_points) < max_faces:
-        axis_points.append(0)
-        f1_points.append(0)
-        f2_points.append(0)
+    resample_ratio = norm_points/len(axis_points)
+    norm_axis_points = zoom(axis_points, resample_ratio)
+    norm_f1_points = zoom(f1_points, resample_ratio)
+    norm_f2_points = zoom(f2_points, resample_ratio)
     
-    #Had issues with normalizing (plot to see), will fix later
-    # norm_axis_points = np.linspace(min(axis_points),max(axis_points), 100)
-    # norm_f1_points = []
-    # norm_f2_points = []
-    # for i in range(len(norm_axis_points)):
-    #     if i == 0:
-    #         norm_f1_points.append(f1_points[0])
-    #         norm_f2_points.append(f2_points[0])
-    #     elif i == len(norm_axis_points)-1:
-    #         norm_f1_points.append(f1_points[-1])
-    #         norm_f2_points.append(f2_points[-1])
-    #     else:
-    #         axis_index = min(range(len(axis_points)), key=lambda j: abs(axis_points[j]-norm_axis_points[i]))
-    #         f1_slope = (f1_points[axis_index+1] - f1_points[axis_index])/(axis_points[axis_index+1] - axis_points[axis_index])
-    #         norm_f1_points.append(norm_f1_points[i-1]+(norm_axis_points[i]-norm_axis_points[i-1])*f1_slope)
-    #         f2_slope = (f2_points[axis_index+1] - f2_points[axis_index])/(axis_points[axis_index+1] - axis_points[axis_index])
-    #         norm_f2_points.append(norm_f2_points[i-1]+(norm_axis_points[i]-norm_axis_points[i-1])*f2_slope)
-    
-    return axis_points, f1_points, f2_points
+    return norm_axis_points, norm_f1_points, norm_f2_points
 
 #Choose directory and use above functions to put all data into a dict
 print("Compiling dataset...")
@@ -169,17 +151,24 @@ approach_1_time = round(time.time() - start-compilation_runtime,4)
 #Approach Number 2: "Feeling with your finger" representation
 print('\nApproach 2: Finding representations as the finger runs.')
 finger_lines = {}
+points_per_set = 100
 for (feature, designator) in centroids.keys():
     finger_lines[(feature, designator)] = []
-    x_line = return_line(centroids[(feature, designator)], 'x', max_faces)
-    y_line = return_line(centroids[(feature, designator)], 'y', max_faces)
-    z_line = return_line(centroids[(feature, designator)], 'z', max_faces)
+    x_line = return_line(centroids[(feature, designator)], 'x', points_per_set)
+    y_line = return_line(centroids[(feature, designator)], 'y', points_per_set)
+    z_line = return_line(centroids[(feature, designator)], 'z', points_per_set)
     representations = [x_line, y_line, z_line]
     for representation in representations:
         for line in representation:
             for value in line:
                 finger_lines[(feature, designator)].append(value)
-# plt.plot(finger_line[0], finger_line[1], finger_line[0], finger_line[2])
+# plt.plot(finger_lines[0], finger_line[1], finger_line[0], finger_line[2])
+#Write finger_lines to csv file
+with open('finger_lines.csv', 'w', newline = '') as csvfile:
+        finger_writer = csv.writer(csvfile, delimiter = ',')
+        for (feature, designator) in finger_lines.keys():
+            label = [feature, designator]
+            finger_writer.writerow(label+finger_lines[(feature, designator)])
 approach_2_time = round(time.time() - start - compilation_runtime - approach_1_time, 4)
 print('Approach 2 complete in', approach_2_time, 'seconds.')
 
@@ -189,14 +178,14 @@ X = []
 for (feature, designator) in finger_lines.keys():
     y.append(feature)
     X.append(finger_lines[(feature, designator)])
-X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.75, random_state=42)
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.4, random_state=42)
 print('Dataset creation complete.')
 
 train_start = time.time()
 print('\nTraining neural network classifier...')
 #https://scikit-learn.org/stable/modules/generated/sklearn.neural_network.MLPClassifier.html#sklearn.neural_network.MLPClassifier.predict
-clf = MLPClassifier(solver='adam', alpha=1e-5, hidden_layer_sizes=(10, 10),
-                    random_state=1, max_iter=10)
+clf = MLPClassifier(solver='adam', alpha=1e-5, hidden_layer_sizes=(25, 25),
+                    random_state=1, max_iter=200)
 clf.fit(X_train, y_train)
 train_time = round(time.time() -train_start, 4)
 print('Neural network classifier training complete in', train_time, 'seconds.')
