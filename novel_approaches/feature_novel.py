@@ -91,8 +91,11 @@ def return_line(centroids, axis, norm_points):
     
     resample_ratio = norm_points/len(axis_points)
     norm_axis_points = zoom(axis_points, resample_ratio)
+    norm_axis_points += np.random.normal(0,0.001, norm_points)
     norm_f1_points = zoom(f1_points, resample_ratio)
+    norm_f1_points += np.random.normal(0,0.001, norm_points)
     norm_f2_points = zoom(f2_points, resample_ratio)
+    norm_f2_points += np.random.normal(0,0.001, norm_points)
     
     return norm_axis_points, norm_f1_points, norm_f2_points
 
@@ -152,7 +155,10 @@ approach_1_time = round(time.time() - start-compilation_runtime,4)
 print('\nApproach 2: Finding representations as the finger runs.')
 finger_lines = {}
 points_per_set = 100
+features = []
 for (feature, designator) in centroids.keys():
+    if feature not in features:
+        features.append(feature)
     finger_lines[(feature, designator)] = []
     x_line = return_line(centroids[(feature, designator)], 'x', points_per_set)
     y_line = return_line(centroids[(feature, designator)], 'y', points_per_set)
@@ -162,7 +168,44 @@ for (feature, designator) in centroids.keys():
         for line in representation:
             for value in line:
                 finger_lines[(feature, designator)].append(value)
-# plt.plot(finger_lines[0], finger_line[1], finger_line[0], finger_line[2])
+
+feature_nos = {'Oring': 0, 'through_hole': 1, 'blind_hole': 2,
+              'triangular_passage': 3, 'rectangular_passage': 4,
+              'circular_through_slot': 5, 'triangular_through_slot': 6,
+              'rectangular_through_slot': 7, 'rectangular_blind_slot': 8,
+              'triangular_pocket': 9, 'rectangular_pocket': 10,
+              'circular_end_pocket': 11, 'triangular_blind_step': 12,
+              'circular_blind_step': 13, 'rectangular_blind_step': 14,
+              'rectangular_through_step': 15, '2sides_through_step': 16,
+              'slanted_through_step': 17, 'chamfer': 18, 'round': 19,
+              'v_circular_end_blind_slot': 20, 'h_circular_end_blind_slot': 21,
+              '6sides_passage': 22,'6sides_pocket': 23}
+designators = ['501', '575', '850']
+figures = {}
+axes = {}
+for (feature_no, feature) in enumerate(features):
+    figures[feature], axes[feature] = plt.subplots(nrows=3, ncols=3, figsize=(8,6))
+    figures[feature].suptitle(feature)
+    for (col, designator) in enumerate(designators):
+        all_points = finger_lines[(feature, str(feature_nos[feature])+'_'+designator)]
+        xaxis = all_points[0:99]
+        xf1 = all_points[100:199]
+        xf2 = all_points[200:299]
+        yaxis = all_points[300:399]
+        yf1 = all_points[400:499]
+        yf2 = all_points[500:599]
+        zaxis = all_points[600:699]
+        zf1 = all_points[700:799]
+        zf2 = all_points[800:899]
+        axes[feature][0, col].plot(xaxis, xf1, xaxis, xf2)
+        axes[feature][0, col].set_title(str(feature_nos[feature])+ '_' + designator + ' x')
+        axes[feature][1, col].plot(yaxis, yf1, yaxis, yf2)
+        axes[feature][1, col].set_title(str(feature_nos[feature])+ '_' + designator + ' y')
+        axes[feature][2, col].plot(zaxis, zf1, zaxis, zf2)
+        axes[feature][2, col].set_title(str(feature_nos[feature])+ '_' + designator + ' z')
+    plt.tight_layout()
+    plt.savefig(feature+'.png')
+
 #Write finger_lines to csv file
 with open('finger_lines.csv', 'w', newline = '') as csvfile:
         finger_writer = csv.writer(csvfile, delimiter = ',')
@@ -194,7 +237,6 @@ print('Model accuracy is', accuracy)
 
 confusion = {}
 print('\nBuilding confusion matrix...')
-features = list(np.unique(np.array(y_train)))
 for actual_feature in features:
     confusion[actual_feature] = {}
     for predicted_feature in features:
